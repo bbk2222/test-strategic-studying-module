@@ -56,6 +56,25 @@
             margin-bottom: 8px;
             display: flex;
             justify-content: space-between;
+            align-items: center;
+        }
+
+        .reset-btn {
+            margin-left: 10px; 
+            font-size: 0.7rem; 
+            padding: 4px 8px; 
+            cursor: pointer; 
+            border-radius: 4px; 
+            border: 1px solid var(--dark-blue); 
+            background: var(--cream); 
+            color: var(--dark-blue);
+            font-weight: bold;
+            transition: all 0.2s ease;
+        }
+
+        .reset-btn:hover {
+            background: var(--dark-blue);
+            color: var(--cream);
         }
 
         .progress-bar-container {
@@ -123,13 +142,6 @@
             padding: 4px;
             font-size: 1rem;
             border: 2px solid var(--gray);
-        }
-
-        .unit-btn.locked {
-            background-color: #B0BEC5;
-            box-shadow: 0 6px 0px #78909C;
-            cursor: not-allowed;
-            color: #eceff1;
         }
 
         /* --- Modal (Pop-up) Styles --- */
@@ -244,7 +256,7 @@
         <!-- Main Header -->
         <div class="main-header">
             <div class="progress-header-text">
-                <span>Course Progress</span>
+                <span>Course Progress <button class="reset-btn" onclick="resetProgress()">Reset</button></span>
                 <span id="overall-percentage">0%</span>
             </div>
             <div class="progress-bar-container">
@@ -408,6 +420,21 @@
                 localStorage.setItem('strategicCourseProgress', JSON.stringify(completedUnits));
                 
                 // Re-render UI
+                renderUnitGrid();
+                updateOverallProgress();
+            }
+        }
+
+        // --- RESET PROGRESS ---
+        function resetProgress() {
+            if(confirm("Are you sure you want to reset all your progress?")) {
+                // Clear the local storage
+                localStorage.removeItem('strategicCourseProgress');
+                
+                // Reset the working array
+                completedUnits = [];
+                
+                // Re-render the UI
                 renderUnitGrid();
                 updateOverallProgress();
             }
