@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strategic Studying Course</title>
+    <style>
+        /* --- Color Palette & Global Styles --- */
+        :root {
+            --dark-blue: #1A2B4C;
+            --cream: #F9F6F0;
+            --accent-gold: #D4AF37;
+            --success-green: #4CAF50;
+            --card-bg: #FFFFFF;
+            --gray: #E0DCD3;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--cream);
+            color: var(--dark-blue);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* --- Main App Container --- */
+        #app-container {
+            width: 100%;
+            max-width: 450px;
+            height: 700px;
+            background-color: var(--cream);
+            border: 4px solid var(--dark-blue);
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        /* --- Overall Header & Progress --- */
+        .main-header {
+            padding: 20px;
+            background-color: var(--card-bg);
+            border-bottom: 3px solid var(--gray);
+        }
+
+        .progress-header-text {
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            color: var(--dark-blue);
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 14px;
+            background-color: var(--gray);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background-color: var(--success-green);
+            border-radius: 10px;
+            transition: width 0.5s ease-in-out;
+        }
+
+        /* --- Unit Grid (The Path) --- */
+        .unit-container {
+            flex-grow: 1;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+            overflow-y: auto;
+        }
+
+        .unit-btn {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: var(--dark-blue);
+            color: var(--cream);
+            font-size: 1.5rem;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 6px 0px #0D1626;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+
+        .unit-btn:active {
+            transform: translateY(6px);
+            box-shadow: 0 0px 0px #0D1626;
+        }
+
+        .unit-btn.completed {
+            background-color: var(--success-green);
+            box-shadow: 0 6px 0px #2E7D32;
+        }
+
+        .unit-btn.completed::after {
+            content: '✔️';
+            position: absolute;
+            bottom: -5px;
+            right: -5px;
+            background: var(--card-bg);
+            border-radius: 50%;
+            padding: 4px;
+            font-size: 1rem;
+            border: 2px solid var(--gray);
+        }
+
+        .unit-btn.locked {
+            background-color: #B0BEC5;
+            box-shadow: 0 6px 0px #78909C;
+            cursor: not-allowed;
+            color: #eceff1;
+        }
+
+        /* --- Modal (Pop-up) Styles --- */
+        .modal-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(26, 43, 76, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal-content {
+            background: var(--cream);
+            width: 90%;
+            height: 90%;
+            border-radius: 20px;
+            border: 4px solid var(--dark-blue);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+
+        /* --- Modal Header & Unit Progress --- */
+        .modal-header {
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-bottom: 2px solid var(--gray);
+        }
+
+        .close-btn {
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+            font-weight: bold;
+        }
+
+        /* --- Carousel Area --- */
+        .carousel-area {
+            flex-grow: 1;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .carousel-emoji {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .carousel-title {
+            color: var(--accent-gold);
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+        }
+
+        .carousel-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        /* --- Modal Footer --- */
+        .modal-footer {
+            padding: 20px;
+            background-color: var(--card-bg);
+        }
+
+        .btn-action {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--cream);
+            background-color: var(--dark-blue);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 0px #0D1626;
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+
+        .btn-action:active {
+            transform: translateY(4px);
+            box-shadow: 0 0px 0px #0D1626;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="app-container">
+        <!-- Main Header -->
+        <div class="main-header">
+            <div class="progress-header-text">
+                <span>Course Progress</span>
+                <span id="overall-percentage">0%</span>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-fill" id="overall-progress"></div>
+            </div>
+        </div>
+
+        <!-- Unit Hub -->
+        <div class="unit-container" id="unit-container">
+            <!-- Buttons are generated by JavaScript -->
+        </div>
+
+        <!-- Modal (Pop-up) -->
+        <div class="modal-overlay" id="unit-modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="close-btn" onclick="closeModal()">✖</div>
+                    <div class="progress-bar-container">
+                        <div class="progress-fill" id="modal-progress"></div>
+                    </div>
+                </div>
+                
+                <div class="carousel-area">
+                    <div class="carousel-emoji" id="slide-emoji">📖</div>
+                    <h2 class="carousel-title" id="slide-title">Title Here</h2>
+                    <p class="carousel-text" id="slide-text">Content goes here...</p>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn-action" id="next-btn" onclick="nextSlide()">CONTINUE</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA STRUCTURE (We will fill this out later) ---
+        const courseData = [
+            {
+                id: 1,
+                title: "Unit 1",
+                slides: [
+                    { emoji: "👋", title: "Welcome to Unit 1", text: "This is a placeholder for your first slide. Soon we will inject your real content here." },
+                    { emoji: "🧠", title: "Slide 2 Concept", text: "Notice how the progress bar at the top of this pop-up moved? You are progressing through the carousel." }
+                ]
+            },
+            {
+                id: 2,
+                title: "Unit 2",
+                slides: [
+                    { emoji: "🚀", title: "Unit 2 Begin", text: "This is the first slide of unit 2." },
+                    { emoji: "⭐", title: "Finished!", text: "You have reached the end of this demo unit." }
+                ]
+            },
+            {
+                id: 3,
+                title: "Unit 3",
+                slides: [
+                    { emoji: "🚧", title: "Under Construction", text: "More content coming soon." }
+                ]
+            }
+        ];
+
+        // --- STATE MANAGEMENT ---
+        // Load progress from browser's local storage (so it saves when they leave)
+        let completedUnits = JSON.parse(localStorage.getItem('strategicCourseProgress')) || [];
+        
+        let currentUnitIndex = null;
+        let currentSlideIndex = 0;
+
+        // --- INITIALIZATION ---
+        function initApp() {
+            renderUnitGrid();
+            updateOverallProgress();
+        }
+
+        // --- RENDER MAIN MENU ---
+        function renderUnitGrid() {
+            const container = document.getElementById('unit-container');
+            container.innerHTML = ''; // Clear container
+
+            courseData.forEach((unit, index) => {
+                const btn = document.createElement('button');
+                
+                // Check if completed
+                if (completedUnits.includes(unit.id)) {
+                    btn.className = 'unit-btn completed';
+                } else {
+                    btn.className = 'unit-btn';
+                }
+
+                btn.innerText = index + 1;
+                btn.onclick = () => openModal(index);
+                container.appendChild(btn);
+            });
+        }
+
+        function updateOverallProgress() {
+            const percentage = (completedUnits.length / courseData.length) * 100;
+            document.getElementById('overall-progress').style.width = percentage + '%';
+            document.getElementById('overall-percentage').innerText = Math.round(percentage) + '%';
+        }
+
+        // --- MODAL & CAROUSEL LOGIC ---
+        function openModal(unitIndex) {
+            currentUnitIndex = unitIndex;
+            currentSlideIndex = 0;
+            
+            document.getElementById('unit-modal').classList.add('active');
+            renderSlide();
+        }
+
+        function closeModal() {
+            document.getElementById('unit-modal').classList.remove('active');
+        }
+
+        function renderSlide() {
+            const unit = courseData[currentUnitIndex];
+            const slide = unit.slides[currentSlideIndex];
+
+            // Update Content
+            document.getElementById('slide-emoji').innerText = slide.emoji;
+            document.getElementById('slide-title').innerText = slide.title;
+            document.getElementById('slide-text').innerText = slide.text;
+
+            // Update Modal Progress Bar
+            const slideProgress = ((currentSlideIndex + 1) / unit.slides.length) * 100;
+            document.getElementById('modal-progress').style.width = slideProgress + '%';
+
+            // Update Button Text
+            const btn = document.getElementById('next-btn');
+            if (currentSlideIndex === unit.slides.length - 1) {
+                btn.innerText = "FINISH UNIT";
+                btn.style.backgroundColor = "var(--success-green)";
+                btn.style.boxShadow = "0 4px 0px #2E7D32";
+            } else {
+                btn.innerText = "CONTINUE";
+                btn.style.backgroundColor = "var(--dark-blue)";
+                btn.style.boxShadow = "0 4px 0px #0D1626";
+            }
+        }
+
+        function nextSlide() {
+            const unit = courseData[currentUnitIndex];
+
+            if (currentSlideIndex < unit.slides.length - 1) {
+                // Move to next slide
+                currentSlideIndex++;
+                renderSlide();
+            } else {
+                // Unit Complete!
+                markUnitComplete(unit.id);
+                closeModal();
+            }
+        }
+
+        function markUnitComplete(unitId) {
+            if (!completedUnits.includes(unitId)) {
+                completedUnits.push(unitId);
+                // Save to local storage
+                localStorage.setItem('strategicCourseProgress', JSON.stringify(completedUnits));
+                
+                // Re-render UI
+                renderUnitGrid();
+                updateOverallProgress();
+            }
+        }
+
+        // Boot up the app
+        initApp();
+    </script>
+</body>
+</html>
