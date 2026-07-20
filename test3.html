@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strategic Studying Course</title>
+    <style>
+        /* --- Color Palette & Global Styles --- */
+        :root {
+            --dark-blue: #1A2B4C;
+            --cream: #F9F6F0;
+            --accent-gold: #D4AF37;
+            --success-green: #4CAF50;
+            --card-bg: #FFFFFF;
+            --gray: #E0DCD3;
+            --blue-pill: #1976D2;
+            --red-pill: #D32F2F;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--cream);
+            color: var(--dark-blue);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* --- Main App Container --- */
+        #app-container {
+            width: 100%;
+            max-width: 450px;
+            height: 700px;
+            background-color: var(--cream);
+            border: 4px solid var(--dark-blue);
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        /* --- Overall Header & Progress --- */
+        .main-header {
+            padding: 20px;
+            background-color: var(--card-bg);
+            border-bottom: 3px solid var(--gray);
+        }
+
+        .progress-header-text {
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            color: var(--dark-blue);
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .reset-btn {
+            margin-left: 10px; 
+            font-size: 0.7rem; 
+            padding: 4px 8px; 
+            cursor: pointer; 
+            border-radius: 4px; 
+            border: 1px solid var(--dark-blue); 
+            background: var(--cream); 
+            color: var(--dark-blue);
+            font-weight: bold;
+            transition: all 0.2s ease;
+        }
+
+        .reset-btn:hover {
+            background: var(--dark-blue);
+            color: var(--cream);
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 14px;
+            background-color: var(--gray);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background-color: var(--success-green);
+            border-radius: 10px;
+            transition: width 0.5s ease-in-out;
+        }
+
+        /* --- Unit Grid (The Path) --- */
+        .unit-container {
+            flex-grow: 1;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start; /* Left align everything */
+            gap: 25px;
+            overflow-y: auto;
+        }
+
+        .unit-row {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            width: 100%;
+        }
+
+        .unit-name {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--dark-blue);
+        }
+
+        .unit-btn {
+            width: 70px;
+            height: 70px;
+            flex-shrink: 0;
+            border-radius: 50%;
+            background-color: var(--dark-blue);
+            color: var(--cream);
+            font-size: 1.5rem;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 6px 0px #0D1626;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+
+        .unit-btn:active {
+            transform: translateY(6px);
+            box-shadow: 0 0px 0px #0D1626;
+        }
+
+        .unit-btn.completed {
+            background-color: var(--success-green);
+            box-shadow: 0 6px 0px #2E7D32;
+        }
+
+        .unit-btn.completed::after {
+            content: '✔️';
+            position: absolute;
+            bottom: -5px;
+            right: -5px;
+            background: var(--card-bg);
+            border-radius: 50%;
+            padding: 4px;
+            font-size: 1rem;
+            border: 2px solid var(--gray);
+        }
+
+        .large-bottom-emoji {
+            font-size: 8rem;
+            align-self: center;
+            opacity: 0.8;
+            margin-top: auto; /* Pushes the emoji to fill the bottom space */
+        }
+
+        /* --- Modal (Pop-up) Styles --- */
+        .modal-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(26, 43, 76, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal-content {
+            background: var(--cream);
+            width: 90%;
+            height: 90%;
+            border-radius: 20px;
+            border: 4px solid var(--dark-blue);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+
+        /* --- Modal Header & Unit Progress --- */
+        .modal-header {
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-bottom: 2px solid var(--gray);
+        }
+
+        .close-btn {
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+            font-weight: bold;
+        }
+
+        /* --- Carousel Area --- */
+        .carousel-area {
+            flex-grow: 1;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            overflow-y: auto;
+        }
+
+        .carousel-emoji {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .carousel-title {
+            color: var(--accent-gold);
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+        }
+
+        .carousel-text {
+            font-size: 1.05rem;
+            line-height: 1.6;
+        }
+
+        /* --- Modal Footer --- */
+        .modal-footer {
+            padding: 20px;
+            background-color: var(--card-bg);
+            border-top: 2px solid var(--gray);
+        }
+
+        .btn-action {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--cream);
+            background-color: var(--dark-blue);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 0px #0D1626;
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+
+        .btn-action:active {
+            transform: translateY(4px);
+            box-shadow: 0 0px 0px #0D1626;
+        }
+
+        /* Pill Container specific styles */
+        #pill-container {
+            display: none; /* Hidden by default */
+            gap: 15px;
+        }
+        .pill-btn {
+            flex: 1;
+        }
+        .blue-pill {
+            background-color: var(--blue-pill);
+            box-shadow: 0 4px 0px #115293;
+        }
+        .blue-pill:active {
+            box-shadow: 0 0px 0px #115293;
+        }
+        .red-pill {
+            background-color: var(--red-pill);
+            box-shadow: 0 4px 0px #9A0007;
+        }
+        .red-pill:active {
+            box-shadow: 0 0px 0px #9A0007;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="app-container">
+        <!-- Main Header -->
+        <div class="main-header">
+            <div class="progress-header-text">
+                <span>Unit Progress <button class="reset-btn" onclick="resetProgress()">Reset</button></span>
+                <span id="overall-percentage">0%</span>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-fill" id="overall-progress"></div>
+            </div>
+        </div>
+
+        <!-- Unit Hub -->
+        <div class="unit-container" id="unit-container">
+            <!-- Content injected by JavaScript -->
+        </div>
+
+        <!-- Modal (Pop-up) -->
+        <div class="modal-overlay" id="unit-modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="close-btn" onclick="closeModal()">✖</div>
+                    <div class="progress-bar-container">
+                        <div class="progress-fill" id="modal-progress"></div>
+                    </div>
+                </div>
+                
+                <div class="carousel-area">
+                    <div class="carousel-emoji" id="slide-emoji">📖</div>
+                    <h2 class="carousel-title" id="slide-title">Title Here</h2>
+                    <p class="carousel-text" id="slide-text">Content goes here...</p>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn-action" id="next-btn" onclick="nextSlide()">CONTINUE</button>
+                    
+                    <div id="pill-container">
+                        <button class="btn-action pill-btn blue-pill" onclick="nextSlide()">Blue Pill (Continue)</button>
+                        <button class="btn-action pill-btn red-pill" onclick="exitCourse()">Red Pill (Exit)</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA STRUCTURE WITH YOUR INJECTED CONTENT ---
+        const courseData = [
+            {
+                id: 1,
+                title: "The Matrix of Learning & The Great Shift",
+                slides: [
+                    { 
+                        emoji: "🧠", 
+                        title: "The Matrix of Learning", 
+                        text: "Welcome to your journey of learning how to learn more effectively.<br><br>Before we begin, a word of warning: the information in this course will change the way you see things, and you must learn at your own risk. Once you see the truth about how the human brain actually acquires knowledge, you can’t unsee it. We are offering you the educational equivalent of the 'red pill'." 
+                    },
+                    { 
+                        emoji: "💊", 
+                        title: "The Choice Is Yours", 
+                        text: "Do you want to wake up and see the reality of how learning works, or return to comfortable illusions?", 
+                        isPillChoice: true // Triggers the custom red/blue pill buttons
+                    },
+                    { 
+                        emoji: "🤔", 
+                        title: "Think About Your Experience", 
+                        text: "Have you ever:<br><br>• Spent hours studying only to forget everything by exam time?<br>• Felt confident after studying but performed poorly on a test?<br>• Wondered why some classmates seem to learn more easily?<br>• Tried different study methods without knowing which ones actually work?<br><br>If you answered yes to any of these questions, you’re not alone. Most students have never been explicitly taught which learning strategies are most effective and why." 
+                    },
+                    { 
+                        emoji: "🎓", 
+                        title: "The University Shift", 
+                        text: "When you transition from sixth form or college to university, something fundamental changes. You’re suddenly expected to spend much more time studying independently.<br><br>No-one is really going to keep you accountable to consistently learning, as there is little to no supervision in a similar way to school. Because of this dramatic shift, we need to place a heavy emphasis on the mechanics of learning itself, rather than just focusing on basic time management." 
+                    }
+                ]
+            },
+            {
+                id: 2,
+                title: "The Paradox & The Ultimate Goal",
+                slides: [
+                    { 
+                        emoji: "⚖️", 
+                        title: "The Great Learning Paradox", 
+                        text: "Here is a fundamental truth that will reshape how you approach your degree: <b>what you think is easy is hard, and what you think is hard is easy.</b><br><br>We are often drawn to study methods that feel comfortable. However, effective learning may make you feel 'slow' or frustrated while you are doing it, but it is actually the fastest way to deep learning.<br><br>By applying the science-backed principles in this course, you will realize a powerful promise: the same time and the same effort will yield significantly better results." 
+                    },
+                    { 
+                        emoji: "🎯", 
+                        title: "The Ultimate Goal", 
+                        text: "This course is not designed for simple exam sitters or those who like to discard learning as a means to pass an exam.<br><br>This is for those who want to be proficient life-long learners who seek to enjoy learning, and also achieve more out of life in the process.<br><br>To achieve this, you must become a <b>self-regulated learner</b>—someone who can actively direct and evaluate their own learning process." 
+                    },
+                    { 
+                        emoji: "🏛️", 
+                        title: "The Three Core Pillars", 
+                        text: "Being a self-regulated learner relies on three core pillars:<br><br><b>1. Planning:</b> Before you study, you set goals, choose strategies, and allocate time and resources.<br><b>2. Monitoring:</b> During studying, you track your understanding, adjust your approach when needed, and stay focused.<br><b>3. Reflecting:</b> After studying, you evaluate and reflect on what worked, what didn’t, and how to improve next time." 
+                    },
+                    { 
+                        emoji: "🚀", 
+                        title: "Study Strategically", 
+                        text: "Self-regulated learners don’t just study harder, they study smarter.<br><br>They achieve more with less stress and often less effort, as they don’t just study; they study strategically.<br><br><b>Is this of interest to you? Read on.</b>" 
+                    }
+                ]
+            }
+        ];
+
+        // --- STATE MANAGEMENT ---
+        let completedUnits = JSON.parse(localStorage.getItem('strategicCourseProgress')) || [];
+        let currentUnitIndex = null;
+        let currentSlideIndex = 0;
+
+        // --- INITIALIZATION ---
+        function initApp() {
+            renderUnitGrid();
+            updateOverallProgress();
+        }
+
+        // --- RENDER MAIN MENU ---
+        function renderUnitGrid() {
+            const container = document.getElementById('unit-container');
+            container.innerHTML = ''; 
+
+            courseData.forEach((unit, index) => {
+                const row = document.createElement('div');
+                row.className = 'unit-row';
+
+                const btn = document.createElement('button');
+                btn.className = completedUnits.includes(unit.id) ? 'unit-btn completed' : 'unit-btn';
+                btn.innerText = index + 1;
+                btn.onclick = () => openModal(index);
+                
+                const title = document.createElement('div');
+                title.className = 'unit-name';
+                title.innerText = unit.title;
+
+                row.appendChild(btn);
+                row.appendChild(title);
+                container.appendChild(row);
+            });
+
+            // Add space-filling emoji
+            const bottomEmoji = document.createElement('div');
+            bottomEmoji.className = 'large-bottom-emoji';
+            bottomEmoji.innerText = '🧠'; 
+            container.appendChild(bottomEmoji);
+        }
+
+        function updateOverallProgress() {
+            const percentage = (completedUnits.length / courseData.length) * 100;
+            document.getElementById('overall-progress').style.width = percentage + '%';
+            document.getElementById('overall-percentage').innerText = Math.round(percentage) + '%';
+        }
+
+        // --- MODAL & CAROUSEL LOGIC ---
+        function openModal(unitIndex) {
+            currentUnitIndex = unitIndex;
+            currentSlideIndex = 0;
+            
+            document.getElementById('unit-modal').classList.add('active');
+            renderSlide();
+        }
+
+        function closeModal() {
+            document.getElementById('unit-modal').classList.remove('active');
+        }
+
+        function renderSlide() {
+            const unit = courseData[currentUnitIndex];
+            const slide = unit.slides[currentSlideIndex];
+
+            // Update Content
+            document.getElementById('slide-emoji').innerText = slide.emoji;
+            document.getElementById('slide-title').innerHTML = slide.title;
+            document.getElementById('slide-text').innerHTML = slide.text;
+
+            // Update Modal Progress Bar
+            const slideProgress = ((currentSlideIndex + 1) / unit.slides.length) * 100;
+            document.getElementById('modal-progress').style.width = slideProgress + '%';
+
+            // Handle Buttons (Standard Next vs. Pill Choice)
+            const nextBtn = document.getElementById('next-btn');
+            const pillContainer = document.getElementById('pill-container');
+
+            if (slide.isPillChoice) {
+                nextBtn.style.display = 'none';
+                pillContainer.style.display = 'flex';
+            } else {
+                pillContainer.style.display = 'none';
+                nextBtn.style.display = 'block';
+                
+                if (currentSlideIndex === unit.slides.length - 1) {
+                    nextBtn.innerText = "FINISH UNIT";
+                    nextBtn.style.backgroundColor = "var(--success-green)";
+                    nextBtn.style.boxShadow = "0 4px 0px #2E7D32";
+                } else {
+                    nextBtn.innerText = "CONTINUE";
+                    nextBtn.style.backgroundColor = "var(--dark-blue)";
+                    nextBtn.style.boxShadow = "0 4px 0px #0D1626";
+                }
+            }
+        }
+
+        function nextSlide() {
+            const unit = courseData[currentUnitIndex];
+
+            if (currentSlideIndex < unit.slides.length - 1) {
+                currentSlideIndex++;
+                renderSlide();
+            } else {
+                markUnitComplete(unit.id);
+                closeModal();
+            }
+        }
+
+        function exitCourse() {
+            document.getElementById('slide-emoji').innerText = "🛑";
+            document.getElementById('slide-title').innerText = "Simulation Terminated";
+            document.getElementById('slide-text').innerText = "You have chosen the red pill. The course will now exit.";
+            document.getElementById('pill-container').style.display = 'none';
+            
+            setTimeout(() => {
+                closeModal();
+            }, 2500);
+        }
+
+        function markUnitComplete(unitId) {
+            if (!completedUnits.includes(unitId)) {
+                completedUnits.push(unitId);
+                localStorage.setItem('strategicCourseProgress', JSON.stringify(completedUnits));
+                renderUnitGrid();
+                updateOverallProgress();
+            }
+        }
+
+        // --- RESET PROGRESS ---
+        function resetProgress() {
+            if(confirm("Are you sure you want to reset all your progress?")) {
+                localStorage.removeItem('strategicCourseProgress');
+                completedUnits = [];
+                renderUnitGrid();
+                updateOverallProgress();
+            }
+        }
+
+        // Boot up the app
+        initApp();
+    </script>
+</body>
+</html>
