@@ -386,6 +386,100 @@
         }
         .red-pill:active { transform: translateY(4px); box-shadow: 0 0px 0px var(--red-pill-shadow); }
 
+        /* --- Quiz Styles --- */
+        #question-container {
+            display: none;
+            width: 100%;
+            box-sizing: border-box;
+            margin-top: 15px;
+            text-align: left;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--text-emphasis);
+            margin-bottom: 10px;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .quiz-btn {
+            background-color: var(--card-bg);
+            border: 2px solid var(--gray);
+            border-radius: 12px;
+            padding: 12px 15px;
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-emphasis);
+            font-family: 'Nunito', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+            box-shadow: 0 2px 0px var(--gray-shadow);
+        }
+
+        .quiz-btn:hover:not(:disabled) {
+            background-color: var(--light-gray);
+        }
+
+        .quiz-btn:active:not(:disabled) {
+            transform: translateY(2px);
+            box-shadow: 0 0px 0px var(--gray-shadow);
+        }
+
+        .quiz-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .quiz-btn.correct {
+            background-color: var(--success-green) !important;
+            border-color: var(--success-green-shadow) !important;
+            color: white !important;
+            box-shadow: 0 2px 0px var(--success-green-shadow) !important;
+            opacity: 1 !important;
+        }
+
+        .quiz-btn.incorrect {
+            background-color: var(--red-pill) !important;
+            border-color: var(--red-pill-shadow) !important;
+            color: white !important;
+            box-shadow: 0 2px 0px var(--red-pill-shadow) !important;
+            animation: shake 0.4s;
+            opacity: 1 !important;
+        }
+
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+
+        .quiz-feedback {
+            margin-top: 10px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            display: none;
+            text-align: center;
+        }
+
+        .quiz-feedback.correct {
+            color: var(--success-green);
+            display: block;
+        }
+
+        .quiz-feedback.incorrect {
+            color: var(--red-pill);
+            display: block;
+        }
+
         /* --- Confetti Styles --- */
         .confetti {
             position: absolute;
@@ -437,6 +531,11 @@
                     <div class="carousel-emoji" id="slide-emoji">📖</div>
                     <h2 class="carousel-title" id="slide-title">Title Here</h2>
                     <div class="carousel-text" id="slide-text">Content goes here...</div>
+                    <div id="question-container">
+                        <div class="question-text" id="question-text"></div>
+                        <div class="quiz-options" id="quiz-options"></div>
+                        <div class="quiz-feedback" id="quiz-feedback"></div>
+                    </div>
                 </div>
 
                 <div class="modal-footer" id="standard-nav">
@@ -596,7 +695,17 @@
                     { 
                         emoji: "🎓", 
                         title: "The University Shift", 
-                        text: "When you transition from sixth form or college to university, something fundamental changes. You’re suddenly expected to spend much more time studying <strong style='color: var(--blue-pill); font-size: 1.1rem;'>independently</strong>.<br><br>No-one is really going to keep you accountable to consistently learning, as there is little to no supervision in a similar way to school.<br><br>Because of this dramatic shift, we need to place a heavy emphasis on the <strong style='color: var(--accent-gold);'>mechanics of learning itself</strong>, rather than just focusing on basic time management." 
+                        text: "When you transition from sixth form or college to university, something fundamental changes. You’re suddenly expected to spend much more time studying <strong style='color: var(--blue-pill); font-size: 1.1rem;'>independently</strong>.<br><br>No-one is really going to keep you accountable to consistently learning, as there is little to no supervision in a similar way to school.<br><br>Because of this dramatic shift, we need to place a heavy emphasis on the <strong style='color: var(--accent-gold);'>mechanics of learning itself</strong>, rather than just focusing on basic time management.",
+                        question: {
+                            text: "What is the primary shift in learning when transitioning to university?",
+                            options: [
+                                "More structured time-tabled classes",
+                                "Increased expectation to study independently with less supervision",
+                                "A stronger focus on basic time management",
+                                "More frequent and rigorous testing"
+                            ],
+                            correctIndex: 1
+                        }
                     }
                 ]
             },
@@ -623,7 +732,17 @@
                     { 
                         emoji: "🚀", 
                         title: "Study Strategically", 
-                        text: "Self-regulated learners don’t just study harder, <strong style='font-size: 1.2rem; color: var(--text-emphasis);'>they study smarter.</strong><br><br>They achieve more with less stress and often less effort, as they don’t just study; they <strong style='color: var(--success-green);'>study strategically</strong>.<br><br><div style='text-align: center; margin-top: 20px;'><span style='background: var(--light-gray); padding: 8px 12px; border-radius: 10px; font-weight: 800; color: var(--text-emphasis); border: 2px solid var(--accent-gold);'>Is this of interest to you? Read on.</span></div>" 
+                        text: "Self-regulated learners don’t just study harder, <strong style='font-size: 1.2rem; color: var(--text-emphasis);'>they study smarter.</strong><br><br>They achieve more with less stress and often less effort, as they don’t just study; they <strong style='color: var(--success-green);'>study strategically</strong>.<br><br><div style='text-align: center; margin-top: 20px;'><span style='background: var(--light-gray); padding: 8px 12px; border-radius: 10px; font-weight: 800; color: var(--text-emphasis); border: 2px solid var(--accent-gold);'>Is this of interest to you? Read on.</span></div>",
+                        question: {
+                            text: "Which of the following is NOT one of the three core pillars of a self-regulated learner?",
+                            options: [
+                                "Planning before you study",
+                                "Monitoring during studying",
+                                "Relying on motivation to start",
+                                "Reflecting after studying"
+                            ],
+                            correctIndex: 2
+                        }
                     }
                 ]
             }
@@ -742,6 +861,37 @@
             const backBtn = document.getElementById('back-btn');
             const forwardBtn = document.getElementById('forward-btn');
 
+            const questionContainer = document.getElementById('question-container');
+            const questionText = document.getElementById('question-text');
+            const quizOptions = document.getElementById('quiz-options');
+            const quizFeedback = document.getElementById('quiz-feedback');
+
+            // Reset quiz states
+            quizFeedback.className = 'quiz-feedback';
+            quizFeedback.innerText = '';
+            forwardBtn.disabled = false;
+            forwardBtn.style.opacity = '1';
+
+            if (slide.question) {
+                questionContainer.style.display = 'block';
+                questionText.innerText = slide.question.text;
+                quizOptions.innerHTML = '';
+
+                slide.question.options.forEach((opt, index) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'quiz-btn';
+                    btn.innerText = opt;
+                    btn.onclick = () => selectAnswer(index, btn, slide.question.correctIndex);
+                    quizOptions.appendChild(btn);
+                });
+
+                // Disable forward button until correct answer is chosen
+                forwardBtn.disabled = true;
+                forwardBtn.style.opacity = '0.5';
+            } else {
+                questionContainer.style.display = 'none';
+            }
+
             if (slide.isPillChoice) {
                 standardNav.style.display = 'none';
                 pillContainer.style.display = 'flex';
@@ -761,6 +911,45 @@
                     forwardBtn.style.backgroundColor = "var(--success-green)";
                     forwardBtn.style.boxShadow = "0 4px 0px var(--success-green-shadow)";
                 }
+            }
+        }
+
+        function selectAnswer(selectedIndex, btnElement, correctIndex) {
+            const quizFeedback = document.getElementById('quiz-feedback');
+            const forwardBtn = document.getElementById('forward-btn');
+            const allBtns = document.querySelectorAll('.quiz-btn');
+
+            // Reset previously applied classes on all buttons
+            allBtns.forEach(b => {
+                b.classList.remove('correct', 'incorrect');
+                // Remove animation style so it can re-trigger if needed
+                b.style.animation = 'none';
+                b.offsetHeight; /* trigger reflow */
+                b.style.animation = null;
+            });
+
+            if (selectedIndex === correctIndex) {
+                btnElement.classList.add('correct');
+                quizFeedback.innerText = "Correct! Well done.";
+                quizFeedback.className = 'quiz-feedback correct';
+
+                // Disable all buttons once correct
+                allBtns.forEach(b => {
+                    b.disabled = true;
+                    b.classList.remove('incorrect');
+                    if (b !== btnElement) {
+                        b.style.opacity = '0.6';
+                    }
+                });
+
+                // Enable forward button
+                forwardBtn.disabled = false;
+                forwardBtn.style.opacity = '1';
+                playSlideDing(currentSlideIndex + 1); // Play ding on correct
+            } else {
+                btnElement.classList.add('incorrect');
+                quizFeedback.innerText = "Not quite. Try again!";
+                quizFeedback.className = 'quiz-feedback incorrect';
             }
         }
 
