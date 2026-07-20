@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strategic Studying Course - Module 5</title>
+    <!-- Import Nunito Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        /* --- Color Palette & Global Styles --- */
+        :root {
+            --dark-blue: #0009A0; 
+            --cream: #F6F4E2;     
+            --accent-gold: #D4AF37;
+            --success-green: #58CC02; 
+            --success-green-shadow: #58A700;
+            --card-bg: #FFFFFF;
+            --gray: #E5E5E5;
+            --gray-shadow: #CECECE;
+            --light-gray: #F4F4F6;
+            --blue-pill: #1CB0F6; 
+            --blue-pill-shadow: #1899D6;
+            --red-pill: #FF4B4B; 
+            --red-pill-shadow: #EA2B2B;
+            
+            --text-emphasis: #2D3748; 
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: transparent; 
+            color: var(--dark-blue);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* --- Main App Container --- */
+        #app-container {
+            width: 100%;
+            max-width: 450px;
+            height: 700px;
+            background-color: var(--cream);
+            border: 4px solid var(--dark-blue);
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            position: relative;
+            
+            /* UI Protection: Prevents caret/highlighting on structural elements */
+            user-select: none;
+            -webkit-user-select: none;
+            caret-color: transparent;
+        }
+
+        /* --- Overall Header & Progress --- */
+        .main-header {
+            padding: 14px 20px;
+            background-color: var(--card-bg);
+            border-bottom: 3px solid var(--gray);
+            z-index: 2;
+        }
+
+        .progress-header-text {
+            font-weight: 800;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            color: var(--dark-blue);
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .brand-logo-emoji {
+            font-size: 1.15rem;
+            line-height: 1;
+        }
+
+        .reset-btn {
+            margin-left: 8px; 
+            font-size: 0.7rem; 
+            padding: 3px 6px; 
+            cursor: pointer; 
+            border-radius: 6px; 
+            border: 2px solid var(--dark-blue); 
+            background: var(--cream); 
+            color: var(--dark-blue);
+            font-weight: 800;
+            transition: all 0.2s ease;
+            font-family: 'Nunito', sans-serif;
+        }
+
+        .reset-btn:hover {
+            background: var(--dark-blue);
+            color: var(--cream);
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 14px;
+            background-color: var(--gray);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background-color: var(--success-green);
+            border-radius: 10px;
+            transition: width 0.5s ease-in-out;
+        }
+
+        /* --- Unit Grid (The Path) --- */
+        .unit-container {
+            flex-grow: 1;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            overflow-y: auto;
+            box-sizing: border-box;
+        }
+
+        .unit-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            width: 100%;
+            background-color: var(--card-bg);
+            padding: 15px 20px 22px 20px;
+            border-radius: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+            box-sizing: border-box;
+            cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.1s;
+            position: relative;
+        }
+        
+        .unit-row:active {
+            transform: scale(0.98);
+        }
+
+        .unit-name {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: var(--dark-blue);
+            line-height: 1.3;
+        }
+
+        .unit-time {
+            position: absolute;
+            bottom: 8px;
+            right: 15px;
+            font-size: 0.75rem;
+            color: #A0AEC0;
+            font-weight: 800;
+        }
+
+        .unit-btn {
+            width: 60px;
+            height: 60px;
+            flex-shrink: 0;
+            border-radius: 50%;
+            background-color: var(--dark-blue);
+            color: var(--cream);
+            font-size: 1.5rem;
+            font-weight: 800;
+            border: none;
+            box-shadow: 0 5px 0px var(--dark-blue);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            font-family: 'Nunito', sans-serif;
+            pointer-events: none;
+        }
+
+        .unit-row.completed .unit-btn {
+            background-color: var(--success-green);
+            box-shadow: 0 5px 0px var(--success-green-shadow);
+        }
+
+        .unit-row.completed .unit-btn::after {
+            content: '✔️';
+            position: absolute;
+            bottom: -2px;
+            right: -2px;
+            background: var(--card-bg);
+            border-radius: 50%;
+            padding: 3px;
+            font-size: 0.9rem;
+            border: 2px solid var(--gray);
+            color: var(--dark-blue);
+        }
+
+        .large-bottom-emoji {
+            font-size: 7rem;
+            opacity: 0.7;
+            margin-top: auto;
+        }
+
+        /* --- Modal (Pop-up) Styles --- */
+        .modal-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.85); 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal-content {
+            background: var(--cream);
+            width: 90%;
+            height: 90%;
+            border-radius: 20px;
+            border: 4px solid var(--dark-blue);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+            position: relative;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+
+        /* --- Modal Header & Unit Progress --- */
+        .modal-header {
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-bottom: 2px solid var(--gray);
+            background: var(--card-bg);
+            z-index: 2;
+        }
+
+        .close-btn {
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+            font-weight: 900;
+        }
+
+        /* --- Carousel Area --- */
+        .carousel-area {
+            flex-grow: 1;
+            padding: 30px 25px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            text-align: center;
+            overflow-y: auto;
+            box-sizing: border-box;
+        }
+
+        .carousel-emoji {
+            font-size: 4rem;
+            margin-bottom: 15px;
+        }
+
+        .carousel-title {
+            color: var(--accent-gold);
+            font-size: 1.5rem;
+            font-weight: 900;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .carousel-text {
+            font-size: 1.05rem;
+            line-height: 1.6;
+            background: var(--light-gray);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: left;
+            width: 100%;
+            box-sizing: border-box;
+            color: #333;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.03);
+            margin-bottom: 20px;
+            
+            user-select: text;
+            -webkit-user-select: text;
+            caret-color: auto;
+        }
+
+        /* --- Modal Footer (Navigation Arrows) --- */
+        .modal-footer {
+            padding: 15px 20px;
+            background-color: var(--card-bg);
+            border-top: 2px solid var(--gray);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            z-index: 2;
+            box-sizing: border-box;
+            width: 100%;
+        }
+
+        .nav-btn {
+            height: 50px;
+            border: none;
+            font-size: 1.1rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.1s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Nunito', sans-serif;
+            letter-spacing: 0.5px;
+        }
+
+        .nav-btn:active {
+            transform: translateY(4px);
+        }
+
+        .back-btn {
+            width: 50px;
+            border-radius: 50%;
+            background-color: var(--gray);
+            color: var(--text-emphasis);
+            box-shadow: 0 4px 0px var(--gray-shadow);
+        }
+        .back-btn:active { box-shadow: 0 0px 0px var(--gray-shadow); }
+
+        .forward-btn {
+            flex-grow: 1;
+            border-radius: 15px;
+            background-color: var(--success-green);
+            color: white;
+            box-shadow: 0 4px 0px var(--success-green-shadow);
+        }
+        .forward-btn:active { box-shadow: 0 0px 0px var(--success-green-shadow); }
+
+        /* Pill Container styles */
+        #pill-container {
+            display: none; 
+            gap: 10px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        .pill-btn {
+            flex: 1;
+            padding: 15px 10px;
+            border-radius: 15px;
+            border: none;
+            font-weight: 800;
+            font-size: 1rem;
+            color: white;
+            font-family: 'Nunito', sans-serif;
+            cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.1s;
+            box-sizing: border-box;
+            line-height: 1.2;
+        }
+        
+        .blue-pill {
+            background-color: var(--blue-pill);
+            box-shadow: 0 4px 0px var(--blue-pill-shadow);
+        }
+        .blue-pill:active { transform: translateY(4px); box-shadow: 0 0px 0px var(--blue-pill-shadow); }
+        
+        .red-pill {
+            background-color: var(--red-pill);
+            box-shadow: 0 4px 0px var(--red-pill-shadow);
+        }
+        .red-pill:active { transform: translateY(4px); box-shadow: 0 0px 0px var(--red-pill-shadow); }
+
+        /* --- Confetti Styles --- */
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            top: -10px;
+            border-radius: 2px;
+            z-index: 100;
+            animation: fall linear forwards;
+        }
+        
+        @keyframes fall {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(750px) rotate(720deg); opacity: 0; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="app-container">
+        <!-- Main Header -->
+        <div class="main-header">
+            <div class="progress-header-text">
+                <div class="header-title-group">
+                    <span class="brand-logo-emoji">🧠⚡📖</span>
+                    <span>Unit Progress</span> 
+                    <button class="reset-btn" onclick="resetProgress()">RESET</button>
+                </div>
+                <span id="overall-percentage">0%</span>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-fill" id="overall-progress"></div>
+            </div>
+        </div>
+
+        <!-- Unit Hub -->
+        <div class="unit-container" id="unit-container">
+            <!-- Content injected by JavaScript -->
+        </div>
+
+        <!-- Modal (Pop-up) -->
+        <div class="modal-overlay" id="unit-modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="close-btn" onclick="closeModal()">✖</div>
+                    <div class="progress-bar-container">
+                        <div class="progress-fill" id="modal-progress"></div>
+                    </div>
+                </div>
+                
+                <div class="carousel-area" id="carousel-area">
+                    <div class="carousel-emoji" id="slide-emoji">📖</div>
+                    <h2 class="carousel-title" id="slide-title">Title Here</h2>
+                    <div class="carousel-text" id="slide-text">Content goes here...</div>
+                </div>
+
+                <div class="modal-footer" id="standard-nav">
+                    <button class="nav-btn back-btn" id="back-btn" onclick="prevSlide()">❮</button>
+                    <button class="nav-btn forward-btn" id="forward-btn" onclick="nextSlide()">CONTINUE ❯</button>
+                </div>
+
+                <div class="modal-footer" id="pill-container">
+                    <button class="pill-btn blue-pill" onclick="nextSlide()">Blue Pill<br><span style="font-size: 0.8rem; font-weight: 600;">(Continue)</span></button>
+                    <button class="pill-btn red-pill" onclick="exitCourse()">Red Pill<br><span style="font-size: 0.8rem; font-weight: 600;">(Exit)</span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- WEB AUDIO API (SYNTHESIZED SOUNDS) ---
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new AudioContext();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playBellSound(freq, startTime) {
+            createOscillator(freq, startTime, 0.3, 0.8);
+            createOscillator(freq * 2.0, startTime, 0.15, 0.6);
+            createOscillator(freq * 3.0, startTime, 0.05, 0.4);
+            createOscillator(freq * 4.2, startTime, 0.02, 0.2);
+        }
+
+        function createOscillator(freq, startTime, volume, duration) {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.value = freq;
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            
+            osc.start(startTime);
+            gain.gain.setValueAtTime(0, startTime);
+            gain.gain.linearRampToValueAtTime(volume, startTime + 0.01);
+            gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+            osc.stop(startTime + duration);
+        }
+
+        function playSlideDing(index) {
+            initAudio();
+            const now = audioCtx.currentTime;
+            const melody = [523.25, 659.25, 587.33, 783.99, 659.25, 880.00];
+            const freq = melody[index % melody.length]; 
+            playBellSound(freq, now);
+        }
+
+        function playSubUnitFinishDing() {
+            initAudio();
+            const now = audioCtx.currentTime;
+            [1046.50, 1318.51, 1567.98].forEach((freq, i) => {
+                playBellSound(freq, now + i * 0.1);
+            });
+        }
+
+        function playFanfare() {
+            initAudio();
+            const now = audioCtx.currentTime;
+            const notes = [
+                {f: 392.00, t: 0, d: 0.15}, 
+                {f: 523.25, t: 0.15, d: 0.15}, 
+                {f: 659.25, t: 0.3, d: 0.15}, 
+                {f: 783.99, t: 0.45, d: 0.6}  
+            ];
+            
+            notes.forEach(note => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                const filter = audioCtx.createBiquadFilter();
+                
+                osc.type = 'sawtooth'; 
+                osc.frequency.value = note.f;
+                
+                filter.type = 'lowpass';
+                filter.frequency.value = 2500;
+                
+                osc.connect(filter);
+                filter.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                osc.start(now + note.t);
+                gain.gain.setValueAtTime(0, now + note.t);
+                gain.gain.linearRampToValueAtTime(0.2, now + note.t + 0.05);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + note.t + note.d + 0.2);
+                osc.stop(now + note.t + note.d + 0.2);
+            });
+        }
+
+        // --- CONFETTI LOGIC ---
+        function triggerConfetti() {
+            const container = document.getElementById('app-container');
+            const colors = ['var(--accent-gold)', 'var(--success-green)', 'var(--blue-pill)', 'var(--red-pill)'];
+            
+            for (let i = 0; i < 80; i++) {
+                const confetti = document.createElement('div');
+                confetti.classList.add('confetti');
+                
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.left = Math.random() * 100 + '%';
+                
+                const duration = Math.random() * 2 + 2; 
+                const delay = Math.random() * 0.5;      
+                
+                confetti.style.animationDuration = duration + 's';
+                confetti.style.animationDelay = delay + 's';
+                
+                container.appendChild(confetti);
+                
+                setTimeout(() => {
+                    confetti.remove();
+                }, (duration + delay) * 1000);
+            }
+        }
+
+        // --- MODULE 5 DATA STRUCTURE (3 SUB-UNITS) ---
+        const courseData = [
+            {
+                id: 1,
+                title: "The Effort Paradox & Desirable Difficulties",
+                estimate: "est. 3 mins",
+                slides: [
+                    { 
+                        emoji: "🧗", 
+                        title: "The Effort Paradox", 
+                        text: "Here is a concept that goes against everything you’ve likely assumed about studying:<br><div style='background-color: var(--card-bg); color: var(--text-emphasis); padding: 15px; border-radius: 12px; font-weight: 800; text-align: center; margin: 15px 0; font-size: 1.1rem; border: 3px solid var(--accent-gold);'>What you think is easy is hard, and what you think is hard is easy.</div>We are conditioned by the 'Effort Paradox' to assume that learning should feel smooth, fast, and easy." 
+                    },
+                    { 
+                        emoji: "🛑", 
+                        title: "The Myth of Easy Learning", 
+                        text: "Because of this, when studying feels difficult or frustrating, students often mistakenly believe that something is wrong with them or their chosen strategy." 
+                    },
+                    { 
+                        emoji: "🔬", 
+                        title: "Desirable Difficulties", 
+                        text: "However, researchers Robert and Elizabeth Bjork discovered that conditions making learning harder in the short term actually significantly improve your long-term retention and ability to transfer knowledge to new situations.<br><br>They call this principle <strong style='color: var(--success-green);'>'desirable difficulties'</strong>." 
+                    }
+                ]
+            },
+            {
+                id: 2,
+                title: "What Makes a Difficulty Desirable?",
+                estimate: "est. 3 mins",
+                slides: [
+                    { 
+                        emoji: "🔍", 
+                        title: "Defining Desirable Difficulties", 
+                        text: "<span style='color: var(--text-emphasis); font-weight: 800;'>Not all difficulty is beneficial.</span><br><br>To make a real difference in your learning, desirable difficulties share three key characteristics. Let's look at what makes them work." 
+                    },
+                    { 
+                        emoji: "⚡", 
+                        title: "Active Effort & Retention", 
+                        text: "Here are the first two characteristics:<br><br><div style='margin-bottom: 12px;'><strong style='color: var(--blue-pill);'>1. They require active effort:</strong> You must actively work to process, retrieve, or generate information rather than passively receiving it.</div><div><strong style='color: var(--success-green);'>2. They improve long-term retention:</strong> Despite feeling harder in the moment, they lead to deeper learning that lasts much longer.</div>" 
+                    },
+                    { 
+                        emoji: "🐢", 
+                        title: "Slowing Down Performance", 
+                        text: "The third characteristic of desirable difficulties:<br><br>While you are studying, your progress will actually feel slower, and you will make more errors compared to using easier, less effective methods.<br><br><div style='text-align: center; margin-top: 15px;'><span style='background: var(--light-gray); padding: 8px 12px; border-radius: 10px; font-weight: 800; color: var(--text-emphasis); border: 2px solid var(--accent-gold);'>Embrace the slowdown—it means real growth is happening.</span></div>" 
+                    }
+                ]
+            },
+            {
+                id: 3,
+                title: "Why the Struggle Works & Conclusion",
+                estimate: "est. 4 mins",
+                slides: [
+                    { 
+                        emoji: "🧠", 
+                        title: "Why the Struggle Works", 
+                        text: "Why should you intentionally make studying harder on yourself?<br><br>These difficulties upgrade your cognitive processing in critical ways." 
+                    },
+                    { 
+                        emoji: "⚙️", 
+                        title: "Deeper Processing & Retrieval", 
+                        text: "How cognitive processing is upgraded:<br><br><div style='margin-bottom: 10px;'><strong style='color: var(--blue-pill);'>• Forces Deeper Processing:</strong> When something is difficult, you have to think about it more carefully and process it on a much deeper level.</div><div><strong style='color: var(--accent-gold);'>• Creates Stronger Retrieval Routes:</strong> The actual struggle of trying to retrieve information from memory, and then succeeding, creates stronger neural pathways.</div>" 
+                    },
+                    { 
+                        emoji: "🔍", 
+                        title: "Discrimination & Overconfidence", 
+                        text: "The final two cognitive upgrades:<br><br><div style='margin-bottom: 10px;'><strong style='color: var(--success-green);'>• Requires Discrimination:</strong> Many strategies force you to distinguish between similar concepts or choose specific approaches—crucial for exams.</div><div><strong style='color: var(--red-pill);'>• Prevents Overconfidence:</strong> When studying is too easy, you become overconfident. Difficulties strip away this illusion and keep you radically honest.</div>" 
+                    },
+                    { 
+                        emoji: "🚀", 
+                        title: "Embrace the Struggle", 
+                        text: "You must learn to embrace this productive struggle.<br><br>Effective learning may make you feel <em>'slow'</em> while you are doing it, but it is the absolute fastest way to deep, durable understanding.<br><br><div style='text-align: center; margin-top: 15px;'><div style='display: inline-block; background: var(--card-bg); padding: 8px 14px; border-radius: 10px; font-weight: 800; color: var(--success-green); border: 2px solid var(--success-green); box-shadow: 0 2px 4px rgba(0,0,0,0.04);'>Ready to master desirable difficulties? Let's go!</div></div>" 
+                    }
+                ]
+            }
+        ];
+
+        // --- STATE MANAGEMENT ---
+        let completedUnits = JSON.parse(localStorage.getItem('strategicCourseProgress_m5')) || [];
+        let savedSlideProgress = JSON.parse(localStorage.getItem('strategicSlideProgress_m5')) || {}; 
+        
+        let currentUnitIndex = null;
+        let currentSlideIndex = 0;
+
+        const validUnitIds = courseData.map(u => u.id);
+        completedUnits = completedUnits.filter(id => validUnitIds.includes(id));
+        localStorage.setItem('strategicCourseProgress_m5', JSON.stringify(completedUnits));
+
+        // --- INITIALIZATION ---
+        function initApp() {
+            renderUnitGrid();
+            updateOverallProgress();
+        }
+
+        // --- RENDER MAIN MENU ---
+        function renderUnitGrid() {
+            const container = document.getElementById('unit-container');
+            container.innerHTML = ''; 
+
+            courseData.forEach((unit, index) => {
+                const row = document.createElement('div');
+                const isCompleted = completedUnits.includes(unit.id);
+                row.className = isCompleted ? 'unit-row completed' : 'unit-row';
+                row.onclick = () => openModal(index);
+
+                const btn = document.createElement('div');
+                btn.className = 'unit-btn';
+                btn.innerText = index + 1;
+                
+                const title = document.createElement('div');
+                title.className = 'unit-name';
+                title.innerText = unit.title;
+                
+                const timeEst = document.createElement('div');
+                timeEst.className = 'unit-time';
+                timeEst.innerText = unit.estimate;
+
+                row.appendChild(btn);
+                row.appendChild(title);
+                row.appendChild(timeEst);
+                container.appendChild(row);
+            });
+
+            const bottomEmoji = document.createElement('div');
+            bottomEmoji.className = 'large-bottom-emoji';
+            bottomEmoji.innerText = '🧗'; // Main page emoji for Module 5
+            container.appendChild(bottomEmoji);
+        }
+
+        function updateOverallProgress() {
+            let percentage = (completedUnits.length / courseData.length) * 100;
+            if (percentage > 100) percentage = 100; 
+            document.getElementById('overall-progress').style.width = percentage + '%';
+            document.getElementById('overall-percentage').innerText = Math.round(percentage) + '%';
+        }
+
+        function saveSlidePosition() {
+            if (currentUnitIndex !== null) {
+                const unitId = courseData[currentUnitIndex].id;
+                savedSlideProgress[unitId] = currentSlideIndex;
+                localStorage.setItem('strategicSlideProgress_m5', JSON.stringify(savedSlideProgress));
+            }
+        }
+
+        // --- MODAL & CAROUSEL LOGIC ---
+        function openModal(unitIndex) {
+            initAudio(); 
+            currentUnitIndex = unitIndex;
+            const unitId = courseData[unitIndex].id;
+            
+            if (completedUnits.includes(unitId)) {
+                currentSlideIndex = 0; 
+            } else {
+                currentSlideIndex = savedSlideProgress[unitId] || 0;
+            }
+            
+            document.getElementById('unit-modal').classList.add('active');
+            
+            if (currentSlideIndex === 0) {
+                playSlideDing(currentSlideIndex); 
+            }
+            
+            renderSlide();
+        }
+
+        function closeModal() {
+            document.getElementById('unit-modal').classList.remove('active');
+        }
+
+        function renderSlide() {
+            const unit = courseData[currentUnitIndex];
+            const slide = unit.slides[currentSlideIndex];
+            
+            const isLastSubUnitInCourse = (currentUnitIndex === courseData.length - 1);
+
+            document.getElementById('carousel-area').scrollTop = 0;
+
+            document.getElementById('slide-emoji').innerText = slide.emoji;
+            document.getElementById('slide-title').innerHTML = slide.title;
+            document.getElementById('slide-text').innerHTML = slide.text;
+
+            const slideProgress = ((currentSlideIndex + 1) / unit.slides.length) * 100;
+            document.getElementById('modal-progress').style.width = slideProgress + '%';
+
+            const standardNav = document.getElementById('standard-nav');
+            const pillContainer = document.getElementById('pill-container');
+            const backBtn = document.getElementById('back-btn');
+            const forwardBtn = document.getElementById('forward-btn');
+
+            if (slide.isPillChoice) {
+                standardNav.style.display = 'none';
+                pillContainer.style.display = 'flex';
+            } else {
+                pillContainer.style.display = 'none';
+                standardNav.style.display = 'flex';
+                
+                backBtn.style.visibility = currentSlideIndex === 0 ? 'hidden' : 'visible';
+
+                if (currentSlideIndex === unit.slides.length - 1) {
+                    forwardBtn.innerText = isLastSubUnitInCourse ? "FINISH UNIT ✔️" : "FINISH SUB-UNIT ✔️";
+                    
+                    forwardBtn.style.backgroundColor = "var(--text-emphasis)";
+                    forwardBtn.style.boxShadow = "0 4px 0px #1A202C";
+                } else {
+                    forwardBtn.innerText = "CONTINUE ❯";
+                    forwardBtn.style.backgroundColor = "var(--success-green)";
+                    forwardBtn.style.boxShadow = "0 4px 0px var(--success-green-shadow)";
+                }
+            }
+        }
+
+        function nextSlide() {
+            const unit = courseData[currentUnitIndex];
+            if (currentSlideIndex < unit.slides.length - 1) {
+                currentSlideIndex++;
+                saveSlidePosition();
+                playSlideDing(currentSlideIndex);
+                renderSlide();
+            } else {
+                markUnitComplete(unit.id);
+                closeModal();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlideIndex > 0) {
+                currentSlideIndex--;
+                saveSlidePosition();
+                playSlideDing(currentSlideIndex); 
+                renderSlide();
+            }
+        }
+
+        function exitCourse() {
+            document.getElementById('slide-emoji').innerText = "🛑";
+            document.getElementById('slide-title').innerText = "Simulation Terminated";
+            document.getElementById('slide-text').innerHTML = "<strong style='color: var(--red-pill); font-size: 1.1rem;'>You have chosen the red pill.</strong><br><br>The course will now exit.";
+            document.getElementById('pill-container').style.display = 'none';
+            
+            setTimeout(() => {
+                closeModal();
+            }, 2500);
+        }
+
+        function markUnitComplete(unitId) {
+            if (!completedUnits.includes(unitId)) {
+                completedUnits.push(unitId);
+                localStorage.setItem('strategicCourseProgress_m5', JSON.stringify(completedUnits));
+                
+                savedSlideProgress[unitId] = 0;
+                localStorage.setItem('strategicSlideProgress_m5', JSON.stringify(savedSlideProgress));
+                
+                renderUnitGrid();
+                updateOverallProgress();
+            }
+            
+            if (completedUnits.length === courseData.length) {
+                playFanfare();     
+                triggerConfetti(); 
+            } else {
+                playSubUnitFinishDing(); 
+            }
+        }
+
+        function resetProgress() {
+            if(confirm("Are you sure you want to reset all your progress?")) {
+                localStorage.removeItem('strategicCourseProgress_m5');
+                localStorage.removeItem('strategicSlideProgress_m5');
+                completedUnits = [];
+                savedSlideProgress = {};
+                renderUnitGrid();
+                updateOverallProgress();
+            }
+        }
+
+        initApp();
+    </script>
+</body>
+</html>
